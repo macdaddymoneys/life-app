@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diorcy Ortiz Life App — A private household finance dashboard</title>
+<meta name="description" content="Diorcy Ortiz Life App is a personal-use household finance dashboard. It uses read-only access to account transactions and balances, via Plaid, to power a private budget.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf7f0;
+    --paper-2: #f3efe4;
+    --ink: #211d16;
+    --ink-2: #5c5648;
+    --ink-3: #8a8271;
+    --rule: #ddd6c4;
+    --green: #1e5c44;
+    --green-deep: #143f2f;
+    --gold: #b98a2f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Schibsted Grotesk", ui-sans-serif, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    /* faint ledger ruling */
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 31px,
+        rgba(30, 92, 68, 0.045) 31px,
+        rgba(30, 92, 68, 0.045) 32px
+      );
+  }
+
+  .sheet {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  /* ── masthead ── */
+  header {
+    padding-top: 72px;
+    padding-bottom: 40px;
+    border-bottom: 3px double var(--rule);
+    animation: rise 0.7s ease-out both;
+  }
+
+  .ledger-no {
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-size: clamp(42px, 7vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  h1 .amp { font-style: italic; color: var(--green); }
+
+  .tagline {
+    margin-top: 18px;
+    font-size: 19px;
+    color: var(--ink-2);
+    max-width: 46ch;
+  }
+
+  /* ── sections ── */
+  section {
+    padding: 44px 0 8px;
+    animation: rise 0.7s ease-out both;
+  }
+  section:nth-of-type(1) { animation-delay: 0.08s; }
+  section:nth-of-type(2) { animation-delay: 0.16s; }
+  section:nth-of-type(3) { animation-delay: 0.24s; }
+  section:nth-of-type(4) { animation-delay: 0.32s; }
+
+  .label {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .label::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--rule);
+    transform: translateY(-3px);
+  }
+  .label .idx {
+    font-family: "Instrument Serif", serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--gold);
+    letter-spacing: 0;
+  }
+
+  h2 {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-size: 30px;
+    margin-bottom: 12px;
+  }
+
+  p + p { margin-top: 12px; }
+  .muted { color: var(--ink-2); }
+
+  /* ── entries (ledger rows) ── */
+  .entries { margin-top: 20px; border-top: 1px solid var(--rule); }
+  .entry {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .entry .tick {
+    font-family: "Instrument Serif", serif;
+    font-style: italic;
+    color: var(--green);
+    font-size: 20px;
+    line-height: 1.2;
+  }
+  .entry b { font-weight: 700; }
+  .entry p { color: var(--ink-2); font-size: 15.5px; margin-top: 2px; }
+
+  /* ── plaid note ── */
+  .note {
+    margin-top: 26px;
+    background: var(--paper-2);
+    border-left: 3px solid var(--green);
+    padding: 18px 22px;
+    font-size: 15.5px;
+    color: var(--ink-2);
+  }
+  .note b { color: var(--ink); }
+
+  a { color: var(--green-deep); text-decoration-color: var(--gold); text-underline-offset: 3px; }
+  a:hover { color: var(--green); }
+
+  /* ── contact ── */
+  .contact-card {
+    margin-top: 20px;
+    border: 1px solid var(--rule);
+    background: #fffdf7;
+    padding: 26px 28px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 4px 4px 0 var(--paper-2);
+  }
+  .contact-card .who {
+    font-family: "Instrument Serif", serif;
+    font-size: 22px;
+  }
+  .contact-card .mail {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 22px;
+    border-top: 3px double var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-3);
+    animation: rise 0.7s ease-out 0.4s both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    header, section, footer { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <div class="ledger-no"><span>Personal software · Est. 2026</span><span>Household ledger</span></div>
+    <h1>Diorcy Ortiz <span class="amp">Life</span> App</h1>
+    <p class="tagline">A private, personal-use finance dashboard — one household's budget, bills, and
+    spending, gathered in one place.</p>
+  </header>
+
+  <section>
+    <div class="label"><span class="idx">i.</span> What this is</div>
+    <h2>Software for one household.</h2>
+    <p>The Life App is a self-built personal dashboard used by its author to manage day-to-day
+    finances: monthly budgeting, bill tracking, and spending review. It is not a commercial
+    product — it has no customers, no sign-ups, and no audience beyond the household that
+    built it.</p>
+  </section>
+
+  <section>
+    <div class="label"><span class="idx">ii.</span> Data access</div>
+    <h2>Read-only, and only what budgeting needs.</h2>
+    <p>To keep the budget accurate without manual entry, the app connects to the household's own
+    financial accounts and gathers <b>account transactions and balances</b>. That is the full
+    extent of its access.</p>
+    <div class="entries">
+      <div class="entry"><span class="tick">✓</span><div><b>Read-only.</b>
+        <p>The app can view transactions and balances. It cannot move money, make payments, or change anything at any institution.</p></div></div>
+      <div class="entry"><span class="tick">✓</span><div><b>Connected through Plaid.</b>
+        <p>Bank connections are made via <a href="https://plaid.com" rel="noopener">Plaid</a>. Bank credentials are entered with Plaid or the institution directly — this application never sees or stores them.</p></div></div>
+      <div class="entry"><span class="tick">✓</span><div><b>Revocable at any time.</b>
+        <p>Connections can be reviewed and revoked through <a href="https://my.plaid.com" rel="noopener">Plaid Portal</a> or from the institution's own connected-apps settings.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="label"><span class="idx">iii.</span> Privacy</div>
+    <h2>The data stays home.</h2>
+    <p>Financial data retrieved by the app is stored privately on infrastructure controlled by the
+    author and used for exactly one purpose: the household budget.</p>
+    <div class="note">
+      Data is <b>never sold, shared, rented, or disclosed</b> to any third party. There is no
+      advertising, no analytics resale, and no marketing use of any kind. Data is retained only
+      while it is useful to the budget, and a connected institution can be removed — along with
+      its live connection — at any time.
+    </div>
+  </section>
+
+  <section>
+    <div class="label"><span class="idx">iv.</span> Contact</div>
+    <h2>Questions answered directly.</h2>
+    <p class="muted">For any question about this application, its data practices, or a connection
+    it holds, contact the developer and sole operator:</p>
+    <div class="contact-card">
+      <span class="who">Diorcy Ortiz</span>
+      <a class="mail" href="mailto:Diorcy.Ortiz@outlook.com">Diorcy.Ortiz@outlook.com</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Diorcy Ortiz · Personal, non-commercial software</span>
+    <span>Not affiliated with Plaid Inc.</span>
+  </footer>
+
+</div>
+</body>
+</html>
